@@ -176,3 +176,73 @@ Loan-Lens/
 ## License
 
 MIT License — see [LICENSE](LICENSE) for details.
+
+---
+
+## Advanced Endpoints
+
+### POST `/api/v1/explain`
+
+Explain a prediction with SHAP feature contributions (falls back to finite-difference if SHAP unavailable).
+
+```bash
+curl -X POST http://localhost:8000/api/v1/explain \
+  -H "Content-Type: application/json" \
+  -d '{"loan_amount":10000,"annual_income":60000,"installment":320,"interest_rate":12.5,"loan_term_months":36,"fico_score":700,"revolving_utilization":0.25,"revolving_balance":5000,"delinquencies_2y":0,"credit_history_months":84,"open_accounts":5,"total_accounts":12,"public_records":0}'
+```
+
+**Response:**
+```json
+{
+  "method": "finite_diff",
+  "top_features": [
+    {"feature": "fico_score", "contribution": -0.0012},
+    {"feature": "revolving_utilization", "contribution": 0.0008}
+  ]
+}
+```
+
+### POST `/api/v1/batch`
+
+Score up to 500 applications in a single request.
+
+```bash
+curl -X POST http://localhost:8000/api/v1/batch \
+  -H "Content-Type: application/json" \
+  -d '{"applications": [{...}, {...}]}'
+```
+
+### GET `/api/v1/drift`
+
+Feature drift analysis comparing training distribution against last 100 production requests.
+
+---
+
+## Model Monitoring
+
+Every `/api/v1/predict` call is logged to `prediction_logs`. The `/api/v1/drift` endpoint
+runs KS-tests per feature and logs detected drift events to `drift_logs`. The Airflow
+retraining DAG (`pipelines/retrain_dag.py`) automatically triggers weekly retraining or
+when ≥3 features show drift.
+
+---
+
+## Seeding Data
+
+```bash
+python scripts/seed_data.py -n 500
+```
+
+---
+
+## Feature Engineering (26 Features)
+
+| Category | Features |
+|---|---|
+| **Raw** | loan_amount, annual_income, installment, interest_rate, loan_term_months, fico_score, revolving_utilization, revolving_balance, delinquencies_2y, credit_history_months, open_accounts, total_accounts, public_records |
+| **Ratios** | debt_to_income, installment_to_income, loan_to_income_ratio |
+| **Interactions** | credit_util_x_delinq, income_x_credit_history |
+| **Log transforms** | log_annual_income, log_loan_amount, log_revolving_balance |
+| **Buckets** | income_bucket (5 bins), credit_score_bucket (5 bins) |
+| **Polynomial** | rate_squared, rate_x_term |
+| **Normalised** | income_z |
