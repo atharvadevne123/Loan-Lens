@@ -188,3 +188,22 @@ def drift(db: Session = Depends(get_db)) -> dict:
         "features_drifted": len(drifted),
         "drift_details": results,
     }
+
+
+# ── Batch prediction endpoint ─────────────────────────────────────────────────
+
+class BatchRequest(BaseModel):
+    applications: list[LoanApplicationSchema] = Field(..., min_length=1, max_length=500)
+
+
+@app.post(
+    "/api/v1/batch",
+    tags=["prediction"],
+    summary="Score a batch of loan applications",
+    description="Accepts up to 500 applications and returns risk scores for all in parallel.",
+)
+def batch_predict_endpoint(batch: BatchRequest) -> dict:
+    from app.batch import batch_predict
+
+    results = batch_predict([a.model_dump() for a in batch.applications])
+    return {"count": len(results), "results": results}
