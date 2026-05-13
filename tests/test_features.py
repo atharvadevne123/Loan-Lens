@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from app.features import CreditFeatureEngineer, FEATURE_COLUMNS, build_feature_pipeline
+from app.features import FEATURE_COLUMNS, CreditFeatureEngineer, build_feature_pipeline
 
 
 @pytest.fixture
@@ -58,7 +58,7 @@ def test_engineer_transform_consistent(sample_df):
 def test_feature_columns_all_present(sample_df):
     eng = CreditFeatureEngineer()
     out = eng.fit_transform(sample_df)
-    missing = [c for c in FEATURE_COLUMNS if c in out.columns or c in sample_df.columns]
+    [c for c in FEATURE_COLUMNS if c in out.columns or c in sample_df.columns]
     # Engineered features should be a superset of raw features
     assert len(out.columns) >= len(sample_df.columns)
 

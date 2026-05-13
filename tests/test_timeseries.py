@@ -1,10 +1,14 @@
 """Tests for time-series feature engineering."""
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pytest
 
-from pipelines.timeseries_features import add_rolling_features, add_lag_features, compute_portfolio_default_trend
+from pipelines.timeseries_features import (
+    add_lag_features,
+    add_rolling_features,
+    compute_portfolio_default_trend,
+)
 
 
 @pytest.fixture
@@ -44,7 +48,7 @@ def test_compute_portfolio_trend_empty():
 def test_compute_portfolio_trend(daily_df):
     records = [
         {"created_at": str(d), "prediction": int(r > 0.25)}
-        for d, r in zip(daily_df["date"], daily_df["default_rate"])
+        for d, r in zip(daily_df["date"], daily_df["default_rate"], strict=False)
     ]
     result = compute_portfolio_default_trend(records)
     assert "default_rate" in result.columns

@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.explainability import get_shap_explanation, _finite_diff_explanation
+from app.explainability import _finite_diff_explanation, get_shap_explanation
 
 
 def test_explain_returns_top_features(sample_application):

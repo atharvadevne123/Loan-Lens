@@ -1,13 +1,12 @@
 """Fairness metrics tests."""
 
 import numpy as np
-import pandas as pd
 import pytest
 
 from app.fairness import (
+    compute_fairness_report,
     demographic_parity_difference,
     equalized_odds_difference,
-    compute_fairness_report,
 )
 
 

@@ -3,14 +3,14 @@
 import hashlib
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 logger = logging.getLogger(__name__)
 
 
 def now_utc() -> datetime:
     """Return the current UTC datetime."""
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def stable_hash(data: dict) -> str:

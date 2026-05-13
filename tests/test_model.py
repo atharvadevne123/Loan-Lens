@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from app.model import predict, train_model, RAW_FEATURE_COLS
+from app.model import predict, train_model
 
 
 def test_train_model_returns_metrics(synthetic_dataframe):
@@ -58,7 +58,7 @@ def test_high_fico_generally_low_risk(sample_application, fico_score, expected_r
 
 def test_train_with_imbalanced_labels(synthetic_dataframe):
     X, _ = synthetic_dataframe
-    rng = np.random.default_rng(42)
+    np.random.default_rng(42)
     y = pd.Series([0] * (len(X) - 10) + [1] * 10)
     _, metrics = train_model(X, y)
     assert metrics["auc_mean"] >= 0.0

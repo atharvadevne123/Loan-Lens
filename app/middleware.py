@@ -2,7 +2,6 @@
 
 import logging
 import time
-import uuid
 from collections import defaultdict
 
 from fastapi import Request, status

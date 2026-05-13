@@ -1,7 +1,8 @@
 """Tests for utility functions."""
 
 import pytest
-from app.utils import stable_hash, clamp, format_probability, risk_tier
+
+from app.utils import clamp, format_probability, risk_tier, stable_hash
 
 
 def test_stable_hash_deterministic():

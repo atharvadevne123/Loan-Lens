@@ -1,9 +1,7 @@
 """SHAP-based model explainability for loan default predictions."""
 
 import logging
-from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -16,8 +14,9 @@ def get_shap_explanation(features: dict) -> dict:
     """
     try:
         import shap
-        from app.model import load_model
+
         from app.features import FEATURE_COLUMNS
+        from app.model import load_model
 
         pipe, engineer = load_model()
         df = pd.DataFrame([features])
@@ -29,7 +28,7 @@ def get_shap_explanation(features: dict) -> dict:
             shap_values = explainer.shap_values(X_feat)
             if isinstance(shap_values, list):
                 shap_values = shap_values[1]
-            contributions = dict(zip(FEATURE_COLUMNS, shap_values[0].tolist()))
+            contributions = dict(zip(FEATURE_COLUMNS, shap_values[0].tolist(), strict=False))
             top5 = sorted(contributions.items(), key=lambda x: abs(x[1]), reverse=True)[:5]
             return {"method": "shap", "top_features": [{"feature": k, "contribution": round(v, 4)} for k, v in top5]}
         except Exception as inner:

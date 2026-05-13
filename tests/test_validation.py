@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from pipelines.feature_validation import validate_dataframe, EXPECTED_RANGES
+from pipelines.feature_validation import validate_dataframe
 
 
 @pytest.fixture

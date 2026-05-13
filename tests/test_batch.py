@@ -2,7 +2,7 @@
 
 import pytest
 
-from app.batch import batch_predict, MAX_BATCH_SIZE
+from app.batch import MAX_BATCH_SIZE, batch_predict
 
 
 @pytest.fixture

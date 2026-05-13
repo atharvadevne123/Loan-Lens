@@ -1,7 +1,6 @@
 """AWS S3 integration for model artifact storage (boto3 stub)."""
 
 import logging
-from pathlib import Path
 
 logger = logging.getLogger(__name__)
 

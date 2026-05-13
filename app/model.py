@@ -14,7 +14,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 
-from app.features import CreditFeatureEngineer, FEATURE_COLUMNS
+from app.features import FEATURE_COLUMNS, CreditFeatureEngineer
 
 logger = logging.getLogger(__name__)
 

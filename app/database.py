@@ -3,7 +3,7 @@
 import logging
 import os
 from collections.abc import Generator
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from sqlalchemy import JSON, Column, DateTime, Float, Integer, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
@@ -34,7 +34,7 @@ class PredictionLog(Base):
     probability = Column(Float, nullable=False)
     prediction = Column(Integer, nullable=False)
     model_version = Column(String, default="1.0.0")
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
 
 class DriftLog(Base):
@@ -47,7 +47,7 @@ class DriftLog(Base):
     ks_statistic = Column(Float, nullable=False)
     p_value = Column(Float, nullable=False)
     drift_detected = Column(Integer, nullable=False)
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
 
 def get_db() -> Generator[Session, None, None]:

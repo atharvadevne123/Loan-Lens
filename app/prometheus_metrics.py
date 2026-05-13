@@ -1,14 +1,11 @@
 """Prometheus metrics instrumentation for Loan-Lens (no-op if prometheus_client unavailable)."""
 
 import logging
-import time
-from functools import wraps
-from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 
 try:
-    from prometheus_client import Counter, Histogram, Gauge, generate_latest, CONTENT_TYPE_LATEST
+    from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
 
     PREDICTIONS_TOTAL = Counter(
         "loan_lens_predictions_total",
