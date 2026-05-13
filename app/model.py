@@ -29,8 +29,11 @@ RAW_FEATURE_COLS = [
     "public_records",
 ]
 
+_MODEL_CACHE: tuple[Pipeline, CreditFeatureEngineer] | None = None
+
 
 def build_ensemble() -> VotingClassifier:
+    """Construct a soft-voting ensemble of XGBoost, LightGBM, and RandomForest."""
     xgb = XGBClassifier(
         n_estimators=200, max_depth=4, learning_rate=0.05,
         subsample=0.8, colsample_bytree=0.8, eval_metric="logloss",
@@ -40,9 +43,7 @@ def build_ensemble() -> VotingClassifier:
         n_estimators=200, max_depth=4, learning_rate=0.05,
         subsample=0.8, colsample_bytree=0.8, random_state=42, verbosity=-1,
     )
-    rf = RandomForestClassifier(
-        n_estimators=100, max_depth=6, random_state=42, n_jobs=-1,
-    )
+    rf = RandomForestClassifier(n_estimators=100, max_depth=6, random_state=42, n_jobs=-1)
     return VotingClassifier(
         estimators=[("xgb", xgb), ("lgbm", lgbm), ("rf", rf)],
         voting="soft",
@@ -50,9 +51,12 @@ def build_ensemble() -> VotingClassifier:
 
 
 def train_model(X: pd.DataFrame, y: pd.Series) -> tuple[Pipeline, dict]:
+    """Train the ensemble on X/y with 5-fold CV and persist artefacts."""
+    global _MODEL_CACHE
+
     engineer = CreditFeatureEngineer()
     X_eng = engineer.fit_transform(X)
-    X_feat = X_eng[FEATURE_COLUMNS]
+    X_feat = X_eng[[c for c in FEATURE_COLUMNS if c in X_eng.columns]]
 
     ensemble = build_ensemble()
     pipe = Pipeline([("scaler", StandardScaler()), ("model", ensemble)])
@@ -70,36 +74,51 @@ def train_model(X: pd.DataFrame, y: pd.Series) -> tuple[Pipeline, dict]:
     joblib.dump({"pipeline": pipe, "engineer": engineer}, MODEL_PATH)
     METRICS_PATH.write_text(json.dumps(metrics, indent=2))
 
-    # Save reference data for drift detection
     ref_sample = X_feat.sample(min(500, len(X_feat)), random_state=42)
     REFERENCE_PATH.write_text(ref_sample.to_json(orient="records"))
 
-    logger.info("Model trained: AUC=%.4f±%.4f", metrics["auc_mean"], metrics["auc_std"])
+    _MODEL_CACHE = (pipe, engineer)
+    logger.info("model_trained auc=%.4f±%.4f n_features=%d", metrics["auc_mean"], metrics["auc_std"], metrics["n_features"])
     return pipe, metrics
 
 
 def load_model() -> tuple[Pipeline, CreditFeatureEngineer]:
+    """Return the cached model bundle, loading from disk or seeding if needed."""
+    global _MODEL_CACHE
+    if _MODEL_CACHE is not None:
+        return _MODEL_CACHE
     if not MODEL_PATH.exists():
+        logger.info("No model found — seeding from synthetic data")
         _seed_model()
     bundle = joblib.load(MODEL_PATH)
-    return bundle["pipeline"], bundle["engineer"]
+    _MODEL_CACHE = (bundle["pipeline"], bundle["engineer"])
+    return _MODEL_CACHE
 
 
 def predict(features: dict) -> dict:
+    """Run inference and return probability, binary prediction, and risk tier."""
     pipe, engineer = load_model()
     df = pd.DataFrame([features])
     X_eng = engineer.transform(df)
-    X_feat = X_eng[FEATURE_COLUMNS]
+    X_feat = X_eng[[c for c in FEATURE_COLUMNS if c in X_eng.columns]]
 
     proba = float(pipe.predict_proba(X_feat)[0][1])
-    label = int(proba >= 0.5)
-    risk = "high" if proba >= 0.7 else "medium" if proba >= 0.4 else "low"
+    return {
+        "probability": round(proba, 4),
+        "prediction": int(proba >= 0.5),
+        "risk_level": "high" if proba >= 0.7 else "medium" if proba >= 0.4 else "low",
+    }
 
-    return {"probability": round(proba, 4), "prediction": label, "risk_level": risk}
+
+def get_model_metrics() -> dict:
+    """Return persisted training metrics or empty dict if none exist."""
+    if METRICS_PATH.exists():
+        return json.loads(METRICS_PATH.read_text())
+    return {}
 
 
 def _seed_model() -> None:
-    """Generate synthetic training data to seed the model on first boot."""
+    """Bootstrap model from synthetic data on first startup."""
     rng = np.random.default_rng(42)
     n = 2000
     data = pd.DataFrame({
@@ -117,7 +136,5 @@ def _seed_model() -> None:
         "total_accounts": rng.integers(5, 40, n),
         "public_records": rng.integers(0, 3, n),
     })
-    y = pd.Series((
-        (data["debt_to_income"] if "debt_to_income" in data.columns else data["loan_amount"] / data["annual_income"]) > 0.3
-    ).astype(int) if False else rng.integers(0, 2, n))
+    y = pd.Series(rng.integers(0, 2, n))
     train_model(data, y)
