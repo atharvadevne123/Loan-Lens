@@ -1,23 +1,16 @@
 """SQLAlchemy models and session management for Loan-Lens."""
 
+import logging
 import os
+from collections.abc import Generator
 from datetime import datetime, timezone
 
-from sqlalchemy import (
-    JSON,
-    Column,
-    DateTime,
-    Float,
-    Integer,
-    String,
-    create_engine,
-)
+from sqlalchemy import JSON, Column, DateTime, Float, Integer, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "sqlite:///./loan_lens.db",
-)
+logger = logging.getLogger(__name__)
+
+DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./loan_lens.db")
 
 engine = create_engine(
     DATABASE_URL,
@@ -31,6 +24,8 @@ class Base(DeclarativeBase):
 
 
 class PredictionLog(Base):
+    """Persisted record of each model prediction."""
+
     __tablename__ = "prediction_logs"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -43,6 +38,8 @@ class PredictionLog(Base):
 
 
 class DriftLog(Base):
+    """Persisted drift detection result for a single feature."""
+
     __tablename__ = "drift_logs"
 
     id = Column(Integer, primary_key=True, index=True)
@@ -53,7 +50,8 @@ class DriftLog(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
-def get_db() -> Session:
+def get_db() -> Generator[Session, None, None]:
+    """Yield a database session and close it when done."""
     db = SessionLocal()
     try:
         yield db
@@ -62,4 +60,6 @@ def get_db() -> Session:
 
 
 def init_db() -> None:
+    """Create all tables if they do not exist."""
     Base.metadata.create_all(bind=engine)
+    logger.info("Database initialised at %s", DATABASE_URL)
