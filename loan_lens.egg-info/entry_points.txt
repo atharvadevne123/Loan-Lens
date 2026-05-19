@@ -1,0 +1,2 @@
+[console_scripts]
+loan-lens = app.main:app

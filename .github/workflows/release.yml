@@ -17,10 +17,10 @@ jobs:
           python-version: "3.11"
 
       - name: Install build tools
-        run: pip install build
+        run: pip install --upgrade pip build setuptools wheel
 
       - name: Build wheel
-        run: python -m build --sdist --wheel
+        run: python -m build --sdist --wheel --no-isolation
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
