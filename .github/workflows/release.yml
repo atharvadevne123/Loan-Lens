@@ -20,7 +20,7 @@ jobs:
         run: pip install --upgrade pip build setuptools wheel
 
       - name: Build wheel
-        run: python -m build --sdist --wheel --no-isolation
+        run: python -m build --sdist --wheel
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
