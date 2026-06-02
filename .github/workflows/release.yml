@@ -19,19 +19,20 @@ jobs:
           python-version: "3.11"
 
       - name: Install build tools
-        run: pip install --upgrade pip "build>=1.0" "setuptools>=68" wheel
-
-      - name: Install project dependencies
-        run: pip install -r requirements.txt || true
+        run: pip install --upgrade pip "build>=1.2" "setuptools>=68" wheel twine
 
       - name: Build wheel
         run: python -m build --sdist --wheel
         env:
           PYTHONWARNINGS: ignore
 
+      - name: Check distribution
+        run: twine check dist/*
+
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
+          fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
