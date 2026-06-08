@@ -12,7 +12,9 @@ class LoanApplicationSchema(BaseModel):
     interest_rate: float = Field(..., ge=1, le=40, description="Annual interest rate (%)")
     loan_term_months: int = Field(..., ge=12, le=84, description="Loan term in months (12–84)")
     fico_score: int = Field(..., ge=300, le=850, description="FICO credit score (300–850)")
-    revolving_utilization: float = Field(..., ge=0, le=1, description="Credit utilization ratio (0–1)")
+    revolving_utilization: float = Field(
+        ..., ge=0, le=1, description="Credit utilization ratio (0–1)"
+    )
     revolving_balance: float = Field(..., ge=0, description="Total revolving credit balance in USD")
     delinquencies_2y: int = Field(0, ge=0, description="Number of delinquencies in past 2 years")
     credit_history_months: int = Field(..., ge=0, description="Months of credit history")
@@ -28,15 +30,25 @@ class LoanApplicationSchema(BaseModel):
             raise ValueError("total_accounts must be >= open_accounts")
         return v
 
-    model_config = {"json_schema_extra": {
-        "example": {
-            "loan_amount": 10000.0, "annual_income": 60000.0, "installment": 320.0,
-            "interest_rate": 12.5, "loan_term_months": 36, "fico_score": 700,
-            "revolving_utilization": 0.25, "revolving_balance": 5000.0,
-            "delinquencies_2y": 0, "credit_history_months": 84,
-            "open_accounts": 5, "total_accounts": 12, "public_records": 0,
+    model_config = {
+        "json_schema_extra": {
+            "example": {
+                "loan_amount": 10000.0,
+                "annual_income": 60000.0,
+                "installment": 320.0,
+                "interest_rate": 12.5,
+                "loan_term_months": 36,
+                "fico_score": 700,
+                "revolving_utilization": 0.25,
+                "revolving_balance": 5000.0,
+                "delinquencies_2y": 0,
+                "credit_history_months": 84,
+                "open_accounts": 5,
+                "total_accounts": 12,
+                "public_records": 0,
+            }
         }
-    }}
+    }
 
 
 class PredictionResponseSchema(BaseModel):

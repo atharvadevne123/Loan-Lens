@@ -37,7 +37,11 @@ def log_prediction(
     db.refresh(record)
     logger.info(
         "prediction_logged id=%d corr=%s prob=%.4f label=%d version=%s",
-        record.id, correlation_id, probability, prediction, model_version,
+        record.id,
+        correlation_id,
+        probability,
+        prediction,
+        model_version,
     )
     return record
 
@@ -63,12 +67,7 @@ def compute_feature_drift(
 
     ref_df = pd.DataFrame(json.loads(REFERENCE_PATH.read_text()))
 
-    recent = (
-        db.query(PredictionLog)
-        .order_by(PredictionLog.id.desc())
-        .limit(window)
-        .all()
-    )
+    recent = db.query(PredictionLog).order_by(PredictionLog.id.desc()).limit(window).all()
     if len(recent) < 10:
         logger.info("drift_check skipped: only %d recent predictions (need >=10)", len(recent))
         return []
@@ -88,17 +87,20 @@ def compute_feature_drift(
         results.append(drift)
         if drift["drift_detected"]:
             drifted_count += 1
-            db.add(DriftLog(
-                feature=col,
-                ks_statistic=drift["ks_statistic"],
-                p_value=drift["p_value"],
-                drift_detected=1,
-            ))
+            db.add(
+                DriftLog(
+                    feature=col,
+                    ks_statistic=drift["ks_statistic"],
+                    p_value=drift["p_value"],
+                    drift_detected=1,
+                )
+            )
     db.commit()
 
     logger.info(
         "drift_computed features_checked=%d features_drifted=%d",
-        len(results), drifted_count,
+        len(results),
+        drifted_count,
     )
     return results
 
@@ -113,12 +115,7 @@ def get_model_metrics() -> dict:
 
 def compute_prediction_stats(db: Session, window: int = 1000) -> dict:
     """Summarise recent prediction probabilities and default rate."""
-    recent = (
-        db.query(PredictionLog)
-        .order_by(PredictionLog.id.desc())
-        .limit(window)
-        .all()
-    )
+    recent = db.query(PredictionLog).order_by(PredictionLog.id.desc()).limit(window).all()
     if not recent:
         return {"total_predictions": 0}
 

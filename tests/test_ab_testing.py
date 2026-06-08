@@ -20,10 +20,12 @@ def test_router_consistent_routing():
 
 def test_router_weights_validated():
     with pytest.raises(ValueError, match="weights must sum to 1.0"):
-        ABRouter([
-            ModelVariant(name="a", weight=0.6),
-            ModelVariant(name="b", weight=0.6),
-        ])
+        ABRouter(
+            [
+                ModelVariant(name="a", weight=0.6),
+                ModelVariant(name="b", weight=0.6),
+            ]
+        )
 
 
 def test_router_split_summary():
@@ -41,10 +43,12 @@ def test_router_deterministic_different_ids():
 
 
 def test_custom_router():
-    router = ABRouter([
-        ModelVariant(name="v1", weight=0.7),
-        ModelVariant(name="v2", weight=0.3),
-    ])
+    router = ABRouter(
+        [
+            ModelVariant(name="v1", weight=0.7),
+            ModelVariant(name="v2", weight=0.3),
+        ]
+    )
     results = [router.route(f"id-{i}").name for i in range(1000)]
     v1_rate = results.count("v1") / len(results)
     # Should be close to 70% but with some variance

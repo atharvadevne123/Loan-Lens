@@ -1,6 +1,5 @@
 """Drift detection and monitoring tests."""
 
-
 import numpy as np
 import pytest
 
@@ -69,11 +68,14 @@ def test_prediction_stats_after_logging(db_session):
     assert stats["total_predictions"] >= 5
 
 
-@pytest.mark.parametrize("prob,pred", [
-    (0.1, 0),
-    (0.5, 1),
-    (0.9, 1),
-])
+@pytest.mark.parametrize(
+    "prob,pred",
+    [
+        (0.1, 0),
+        (0.5, 1),
+        (0.9, 1),
+    ],
+)
 def test_log_prediction_various_probs(db_session, prob, pred):
     record = log_prediction(
         db=db_session,

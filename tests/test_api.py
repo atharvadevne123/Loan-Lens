@@ -90,11 +90,14 @@ def test_correlation_id_in_response(client, sample_application):
     assert "x-correlation-id" in resp.headers
 
 
-@pytest.mark.parametrize("loan_amount,expected_status", [
-    (500000.0, 200),
-    (0.0, 422),
-    (500001.0, 422),
-])
+@pytest.mark.parametrize(
+    "loan_amount,expected_status",
+    [
+        (500000.0, 200),
+        (0.0, 422),
+        (500001.0, 422),
+    ],
+)
 def test_predict_loan_amount_boundaries(client, sample_application, loan_amount, expected_status):
     app_data = dict(sample_application)
     app_data["loan_amount"] = loan_amount

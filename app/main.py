@@ -79,12 +79,16 @@ async def correlation_id_middleware(request: Request, call_next):
     response.headers["X-Response-Time-Ms"] = str(elapsed_ms)
     logger.info(
         "request path=%s status=%d ms=%s corr=%s",
-        request.url.path, response.status_code, elapsed_ms, correlation_id,
+        request.url.path,
+        response.status_code,
+        elapsed_ms,
+        correlation_id,
     )
     return response
 
 
 # ── API v1 endpoints ──────────────────────────────────────────────────────────
+
 
 @app.get(
     "/api/v1/health",
@@ -190,6 +194,7 @@ def drift(db: Session = Depends(get_db)) -> dict:
 
 
 # ── Batch prediction endpoint ─────────────────────────────────────────────────
+
 
 class BatchRequest(BaseModel):
     applications: list[LoanApplicationSchema] = Field(..., min_length=1, max_length=500)

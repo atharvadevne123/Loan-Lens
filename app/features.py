@@ -15,13 +15,32 @@ from sklearn.preprocessing import StandardScaler
 logger = logging.getLogger(__name__)
 
 FEATURE_COLUMNS: list[str] = [
-    "loan_amount", "annual_income", "installment", "interest_rate",
-    "loan_term_months", "fico_score", "revolving_utilization", "revolving_balance",
-    "delinquencies_2y", "credit_history_months", "open_accounts", "total_accounts",
-    "public_records", "debt_to_income", "installment_to_income", "loan_to_income_ratio",
-    "credit_util_x_delinq", "income_x_credit_history", "log_annual_income",
-    "log_loan_amount", "log_revolving_balance", "income_bucket", "credit_score_bucket",
-    "rate_squared", "rate_x_term", "income_z",
+    "loan_amount",
+    "annual_income",
+    "installment",
+    "interest_rate",
+    "loan_term_months",
+    "fico_score",
+    "revolving_utilization",
+    "revolving_balance",
+    "delinquencies_2y",
+    "credit_history_months",
+    "open_accounts",
+    "total_accounts",
+    "public_records",
+    "debt_to_income",
+    "installment_to_income",
+    "loan_to_income_ratio",
+    "credit_util_x_delinq",
+    "income_x_credit_history",
+    "log_annual_income",
+    "log_loan_amount",
+    "log_revolving_balance",
+    "income_bucket",
+    "credit_score_bucket",
+    "rate_squared",
+    "rate_x_term",
+    "income_z",
 ]
 
 _INCOME_BINS = [0, 30_000, 60_000, 100_000, 200_000, float("inf")]
@@ -46,7 +65,8 @@ class CreditFeatureEngineer(BaseEstimator, TransformerMixin):
         self._income_std = float(X["annual_income"].std()) + 1e-8
         logger.debug(
             "CreditFeatureEngineer fit income_mean=%.2f income_std=%.2f",
-            self._income_mean, self._income_std,
+            self._income_mean,
+            self._income_std,
         )
         return self
 
@@ -93,7 +113,9 @@ class CreditFeatureEngineer(BaseEstimator, TransformerMixin):
 
 def build_feature_pipeline() -> Pipeline:
     """Return a sklearn Pipeline combining feature engineering and scaling."""
-    return Pipeline([
-        ("engineer", CreditFeatureEngineer()),
-        ("scaler", StandardScaler()),
-    ])
+    return Pipeline(
+        [
+            ("engineer", CreditFeatureEngineer()),
+            ("scaler", StandardScaler()),
+        ]
+    )

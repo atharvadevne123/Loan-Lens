@@ -30,7 +30,10 @@ def get_shap_explanation(features: dict) -> dict:
                 shap_values = shap_values[1]
             contributions = dict(zip(FEATURE_COLUMNS, shap_values[0].tolist(), strict=False))
             top5 = sorted(contributions.items(), key=lambda x: abs(x[1]), reverse=True)[:5]
-            return {"method": "shap", "top_features": [{"feature": k, "contribution": round(v, 4)} for k, v in top5]}
+            return {
+                "method": "shap",
+                "top_features": [{"feature": k, "contribution": round(v, 4)} for k, v in top5],
+            }
         except Exception as inner:
             logger.debug("SHAP tree explainer failed: %s", inner)
     except ImportError:

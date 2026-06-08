@@ -43,9 +43,12 @@ def test_predict_risk_levels(sample_application):
     assert result["risk_level"] in ("low", "medium", "high")
 
 
-@pytest.mark.parametrize("fico_score,expected_risk", [
-    (850, "low"),   # best credit -> low probability usually
-])
+@pytest.mark.parametrize(
+    "fico_score,expected_risk",
+    [
+        (850, "low"),  # best credit -> low probability usually
+    ],
+)
 def test_high_fico_generally_low_risk(sample_application, fico_score, expected_risk):
     app = dict(sample_application)
     app["fico_score"] = fico_score

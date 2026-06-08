@@ -19,6 +19,7 @@ except ImportError:
 
 # ── Standalone retraining functions ──────────────────────────────────────────
 
+
 def load_recent_predictions(db_url: str, limit: int = 5000) -> pd.DataFrame:
     from sqlalchemy import create_engine, text
 
@@ -55,7 +56,9 @@ def check_drift_trigger(db_url: str, threshold: int = 3) -> bool:
         )
         count = result.scalar()
     triggered = count >= threshold
-    logger.info("Drift trigger check: %d drifted features (threshold=%d) -> %s", count, threshold, triggered)
+    logger.info(
+        "Drift trigger check: %d drifted features (threshold=%d) -> %s", count, threshold, triggered
+    )
     return triggered
 
 
@@ -77,9 +80,18 @@ def retrain(db_url: str | None = None, min_samples: int = 200) -> dict:
     target_col = "target" if "target" in df.columns else "prediction"
     y = df[target_col].astype(int)
     raw_cols = [
-        "loan_amount", "annual_income", "installment", "interest_rate",
-        "loan_term_months", "fico_score", "revolving_utilization", "revolving_balance",
-        "delinquencies_2y", "credit_history_months", "open_accounts", "total_accounts",
+        "loan_amount",
+        "annual_income",
+        "installment",
+        "interest_rate",
+        "loan_term_months",
+        "fico_score",
+        "revolving_utilization",
+        "revolving_balance",
+        "delinquencies_2y",
+        "credit_history_months",
+        "open_accounts",
+        "total_accounts",
         "public_records",
     ]
     available = [c for c in raw_cols if c in df.columns]
@@ -92,26 +104,29 @@ def retrain(db_url: str | None = None, min_samples: int = 200) -> dict:
 
 def _generate_synthetic(n: int) -> pd.DataFrame:
     rng = np.random.default_rng(99)
-    return pd.DataFrame({
-        "loan_amount": rng.uniform(1000, 40000, n),
-        "annual_income": rng.uniform(20000, 150000, n),
-        "installment": rng.uniform(50, 1500, n),
-        "interest_rate": rng.uniform(5, 30, n),
-        "loan_term_months": rng.choice([36, 60], n),
-        "fico_score": rng.integers(580, 850, n),
-        "revolving_utilization": rng.uniform(0, 1, n),
-        "revolving_balance": rng.uniform(0, 50000, n),
-        "delinquencies_2y": rng.integers(0, 5, n),
-        "credit_history_months": rng.integers(12, 360, n),
-        "open_accounts": rng.integers(2, 20, n),
-        "total_accounts": rng.integers(5, 40, n),
-        "public_records": rng.integers(0, 3, n),
-        "target": rng.integers(0, 2, n),
-    })
+    return pd.DataFrame(
+        {
+            "loan_amount": rng.uniform(1000, 40000, n),
+            "annual_income": rng.uniform(20000, 150000, n),
+            "installment": rng.uniform(50, 1500, n),
+            "interest_rate": rng.uniform(5, 30, n),
+            "loan_term_months": rng.choice([36, 60], n),
+            "fico_score": rng.integers(580, 850, n),
+            "revolving_utilization": rng.uniform(0, 1, n),
+            "revolving_balance": rng.uniform(0, 50000, n),
+            "delinquencies_2y": rng.integers(0, 5, n),
+            "credit_history_months": rng.integers(12, 360, n),
+            "open_accounts": rng.integers(2, 20, n),
+            "total_accounts": rng.integers(5, 40, n),
+            "public_records": rng.integers(0, 3, n),
+            "target": rng.integers(0, 2, n),
+        }
+    )
 
 
 # ── Airflow DAG (no-op if Airflow not installed) ──────────────────────────────
 if AIRFLOW_AVAILABLE:
+
     @dag(
         dag_id="loan_lens_retrain",
         schedule="@weekly",
@@ -124,11 +139,13 @@ if AIRFLOW_AVAILABLE:
         @task
         def check_drift() -> bool:
             import os
+
             return check_drift_trigger(os.getenv("DATABASE_URL", "sqlite:///./loan_lens.db"))
 
         @task
         def run_retrain(should_retrain: bool) -> dict:
             import os
+
             if not should_retrain:
                 logger.info("No drift detected — skipping retraining")
                 return {}

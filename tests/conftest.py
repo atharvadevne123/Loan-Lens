@@ -70,20 +70,22 @@ def sample_application() -> dict:
 def synthetic_dataframe() -> tuple[pd.DataFrame, pd.Series]:
     rng = np.random.default_rng(0)
     n = 300
-    X = pd.DataFrame({
-        "loan_amount": rng.uniform(1000, 40000, n),
-        "annual_income": rng.uniform(20000, 150000, n),
-        "installment": rng.uniform(50, 1500, n),
-        "interest_rate": rng.uniform(5, 30, n),
-        "loan_term_months": rng.choice([36, 60], n),
-        "fico_score": rng.integers(580, 850, n),
-        "revolving_utilization": rng.uniform(0, 1, n),
-        "revolving_balance": rng.uniform(0, 50000, n),
-        "delinquencies_2y": rng.integers(0, 5, n),
-        "credit_history_months": rng.integers(12, 360, n),
-        "open_accounts": rng.integers(2, 20, n),
-        "total_accounts": rng.integers(5, 40, n),
-        "public_records": rng.integers(0, 3, n),
-    })
+    X = pd.DataFrame(
+        {
+            "loan_amount": rng.uniform(1000, 40000, n),
+            "annual_income": rng.uniform(20000, 150000, n),
+            "installment": rng.uniform(50, 1500, n),
+            "interest_rate": rng.uniform(5, 30, n),
+            "loan_term_months": rng.choice([36, 60], n),
+            "fico_score": rng.integers(580, 850, n),
+            "revolving_utilization": rng.uniform(0, 1, n),
+            "revolving_balance": rng.uniform(0, 50000, n),
+            "delinquencies_2y": rng.integers(0, 5, n),
+            "credit_history_months": rng.integers(12, 360, n),
+            "open_accounts": rng.integers(2, 20, n),
+            "total_accounts": rng.integers(5, 40, n),
+            "public_records": rng.integers(0, 3, n),
+        }
+    )
     y = pd.Series(rng.integers(0, 2, n))
     return X, y

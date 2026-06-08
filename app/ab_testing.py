@@ -39,7 +39,12 @@ class ABRouter:
         for variant in self._variants:
             cumulative += variant.weight
             if bucket < cumulative:
-                logger.debug("ab_route applicant=%s variant=%s bucket=%.4f", applicant_id, variant.name, bucket)
+                logger.debug(
+                    "ab_route applicant=%s variant=%s bucket=%.4f",
+                    applicant_id,
+                    variant.name,
+                    bucket,
+                )
                 return variant
 
         return self._variants[-1]
@@ -49,10 +54,12 @@ class ABRouter:
         return {v.name: v.weight for v in self._variants}
 
 
-_DEFAULT_ROUTER = ABRouter([
-    ModelVariant(name="control", weight=0.9),
-    ModelVariant(name="challenger", weight=0.1),
-])
+_DEFAULT_ROUTER = ABRouter(
+    [
+        ModelVariant(name="control", weight=0.9),
+        ModelVariant(name="challenger", weight=0.1),
+    ]
+)
 
 
 def get_router() -> ABRouter:
