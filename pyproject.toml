@@ -8,14 +8,13 @@ version = "1.0.0"
 description = "Credit risk scoring and loan default prediction API"
 readme = "README.md"
 requires-python = ">=3.11"
-license = {text = "MIT"}
+license = "MIT"
 authors = [
     {name = "Reflective Lantern", email = "devneatharva@gmail.com"},
 ]
 keywords = ["credit-risk", "machine-learning", "fastapi", "loan-default"]
 classifiers = [
     "Programming Language :: Python :: 3.11",
-    "License :: OSI Approved :: MIT License",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 
